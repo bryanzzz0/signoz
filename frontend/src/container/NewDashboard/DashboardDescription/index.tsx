@@ -43,7 +43,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { FullScreenHandle } from 'react-full-screen';
 import { Layout } from 'react-grid-layout';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
 import { useCopyToClipboard } from 'react-use';
+import remarkGfm from 'remark-gfm';
 import { DashboardData, IDashboardVariable } from 'types/api/dashboard/getAll';
 import { Props } from 'types/api/dashboard/update';
 import { ROLES, USER_ROLES } from 'types/roles';
@@ -479,17 +481,23 @@ function DashboardDescription(props: DashboardDescriptionProps): JSX.Element {
 					))}
 				</div>
 			)}
-			{!isEmpty(description) && (
-				<section className="dashboard-description-section">{description}</section>
-			)}
-
+			{/* Render description as Markdown so pasted links become clickable */}
+			{!isEmpty(description) ? (
+				<section className="dashboard-description-section">
+					<ReactMarkdown remarkPlugins={[remarkGfm]}>
+						{(typeof description === 'string'
+							? description
+							: String(description ?? '')
+						).replace(/\r?\n/g, '  \n')}
+					</ReactMarkdown>
+				</section>
+			) : null}
 			{!isEmpty(selectedData.variables) && (
 				<section className="dashboard-variables">
 					<DashboardVariableSelection />
 				</section>
 			)}
 			<DashboardGraphSlider />
-
 			<Modal
 				open={isRenameDashboardOpen}
 				title="Rename Dashboard"
